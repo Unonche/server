@@ -17,7 +17,8 @@
     "@colyseus/tools": "^0.15.41",
     "colyseus": "^0.15.17",
     "express": "^4.21.0",
-    "express-basic-auth": "^1.2.1"
+    "express-basic-auth": "^1.2.1",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@colyseus/testing": "^0.15.3",
@@ -28,7 +29,6 @@
     "chai": "^5.1.1",
     "mocha": "^10.7.3",
     "sinon": "^19.0.2",
-    "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "vitest": "^2.1.1"
   }
