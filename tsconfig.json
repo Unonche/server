@@ -1,0 +1,13 @@
+{
+ "compilerOptions": {
+  "target": "es6",
+  "module": "commonjs",
+  "experimentalDecorators": true, // Enable decorator support
+  "emitDecoratorMetadata": true, // Optional: emits metadata needed for some frameworks
+  "strict": true, // Optional: but good practice for strict type checking
+  "esModuleInterop": true, // Ensure compatibility with ES modules
+  "skipLibCheck": true, // Skips type checking for declaration files
+  "moduleResolution": "node"
+ }
+}
+
