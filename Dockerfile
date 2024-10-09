@@ -1,13 +1,13 @@
-FROM node:14
+FROM node:18-alpine
 
-ENV PORT 8080
+ENV NODE_ENV=production
+ENV PORT=8080
 
 WORKDIR /usr/src/app
 
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
-RUN npm ci --only=production
+RUN npm ci && npm cache clean --force
 
 COPY . .
 
