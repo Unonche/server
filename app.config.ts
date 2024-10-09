@@ -14,11 +14,6 @@ const basicAuthMiddleware = basicAuth({
 });
 
 export default config({
-    options: {
-        // transport: new uWebSocketsTransport(),
-        // driver: new RedisDriver(),
-        // presence: new RedisPresence(),
-    },
     initializeGameServer: async (gameServer) => {
         gameServer.define('uno_room', UnoRoom);
         await matchMaker.createRoom('uno_room', {});
