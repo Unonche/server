@@ -1,4 +1,11 @@
 name: deploy
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+  PROJECT_ID: onche
+  SERVICE_ID: unonche-server
+  CREDENTIALS_ID: github
 on:
   push:
     branches:
