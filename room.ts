@@ -135,6 +135,7 @@ export class UnoRoom extends Room<GameState> {
     this.onMessage("say_uno", (client, message) => {
       const player = this.state.players.get(client.sessionId);
       if (!player) return;
+      let contre = false;
       const playerIds = Array.from(this.state.players.keys());
       for (let i = 0; i < playerIds.length; i++) {
         const p = this.state.players.get(playerIds[i]);
@@ -142,11 +143,12 @@ export class UnoRoom extends Room<GameState> {
 
         if (p.hand.length === 1 && !p.saidUno && p.id !== player.id) {
           this.drawCard(p, 2);
-          this.sendSystemMsg(`${player.name} crie UNONCHE avant ${p.name} et lui fait piocher deux cartes sans vergogne`);
+          this.sendSystemMsg(`${player.name} crie CONTRE UNONCHE pour ${p.name} et lui fait piocher deux cartes sans vergogne`);
+          contre = true;
         }
       }
 
-      if (player.hand.length === 1 && !player.saidUno) {
+      if (!contre && !player.saidUno) {
         player.saidUno = true;
 
         this.broadcast("sayUno", {
@@ -226,6 +228,11 @@ export class UnoRoom extends Room<GameState> {
 
   setTurn(playerId: string) {
     clearTimeout(this.currentTurnTimeout);
+
+    for (const player of this.state.players.values()) {
+      player.saidUno = false;
+    }
+    
     this.state.currentPlayerId = playerId;
     this.state.turnStartTime = Date.now();
     this.currentTurnTimeout = setTimeout(() => {
@@ -318,15 +325,17 @@ export class UnoRoom extends Room<GameState> {
   }
 
   drawCard(player: Player, number: number = 1) {
-    const cards = [];
+    let n = 0;
+    const cards: any[] = [];
     for (let i = 0; i < number; i++) {
       const card = this.state.drawCard(player);
       if (!card) break;
       cards.push(card);
-      this.clients.forEach((client) => {
-        client.send("draw", { playerId: player.id, card: client.id === player.id ? card : null });
-      });
+      n++;
     }
+    this.clients.forEach((client) => {
+      client.send("draw", { playerId: player.id, cards: client.id === player.id ? cards : null, cardsAmount: n });
+    });
     return cards;
   }
 
@@ -376,7 +385,7 @@ export class UnoRoom extends Room<GameState> {
     this.state.discardPile.clear();
     this.state.deck = this.state.generateDeck();
     this.state.shuffleDeck();
-    for (const [_, player] of this.state.players) {
+    for (const player of this.state.players.values()) {
       player.spectator = false;
       player.hand.clear();
       player.handSize = 0;
