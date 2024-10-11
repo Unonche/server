@@ -16,7 +16,7 @@
     "@colyseus/schema": "^2.0.35",
     "@colyseus/tools": "^0.15.41",
     "colyseus": "^0.15.17",
-    "express": "^4.21.0",
+    "express": "^4.21.1",
     "express-basic-auth": "^1.2.1",
     "ts-node": "^10.9.2"
   },
