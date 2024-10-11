@@ -122,4 +122,96 @@ describe("testing your Colyseus app", () => {
       }, 31000);
     });
   });
+
+  it("handle unonche", async function() {
+    const room = await colyseus.createRoom<GameState>("uno_room", {});
+
+    const alice = await colyseus.connectTo(room, { name: 'alice', avatar: 'rire' });
+    const bob = await colyseus.connectTo(room, { name: 'bob', avatar: 'mickey' });
+
+    alice.send('start');
+    await room.waitForNextPatch();
+    room.state.currentPlayerId = alice.sessionId;
+
+    const playerA = room.state.players.get(alice.sessionId);
+    const playerB = room.state.players.get(bob.sessionId);
+
+    if (!playerA || !playerB) throw Error();
+
+    playerA.hand.splice(2);
+    playerA.handSize = playerA.hand.length;
+
+    playerA.hand[0].color = 'wild';
+    playerA.hand[0].value = 'wild';
+    playerA.hand[1].color = 'wild';
+    playerA.hand[1].value = 'wild';
+
+    alice.send('say_uno');
+    await room.waitForNextPatch();
+    assert.strictEqual(playerA.saidUno, true);
+    assert.strictEqual(playerA.handSize, 2);
+    assert.strictEqual(room.state.currentPlayerId, alice.sessionId);
+
+    alice.send('play_card', { cardIndex: 0, nextColor: 'red' });
+    await room.waitForNextPatch();
+    assert.strictEqual(playerA.handSize, 1);
+    assert.strictEqual(room.state.currentPlayerId, bob.sessionId);
+
+    bob.send('say_uno');
+    await room.waitForNextPatch();
+    assert.strictEqual(playerB.saidUno, true);
+
+    bob.send('draw_card');
+    await room.waitForNextPatch();
+    assert.strictEqual(playerB.saidUno, false);
+    assert.strictEqual(room.state.currentPlayerId, alice.sessionId);
+
+    assert.strictEqual(playerA.saidUno, true);
+
+    alice.send('play_card', { cardIndex: 0, nextColor: 'red' });
+    await room.waitForNextPatch();
+
+    assert.strictEqual(room.state.playing, false);
+  });
+
+  it("handle counter-unonche", async function() {
+    const room = await colyseus.createRoom<GameState>("uno_room", {});
+
+    const alice = await colyseus.connectTo(room, { name: 'alice', avatar: 'rire' });
+    const bob = await colyseus.connectTo(room, { name: 'bob', avatar: 'mickey' });
+
+    alice.send('start');
+    await room.waitForNextPatch();
+    room.state.currentPlayerId = alice.sessionId;
+
+    const playerA = room.state.players.get(alice.sessionId);
+    const playerB = room.state.players.get(bob.sessionId);
+
+    if (!playerA || !playerB) throw Error();
+
+    playerA.hand.splice(2);
+    playerA.handSize = playerA.hand.length;
+
+    playerA.hand[0].color = 'wild';
+    playerA.hand[0].value = 'wild';
+    playerA.hand[1].color = 'wild';
+    playerA.hand[1].value = 'wild';
+
+    bob.send('say_uno');
+    await room.waitForNextPatch();
+    assert.strictEqual(playerB.saidUno, true);
+    assert.strictEqual(playerA.handSize, 2);
+    assert.strictEqual(room.state.currentPlayerId, alice.sessionId);
+
+    alice.send('play_card', { cardIndex: 0, nextColor: 'red' });
+    await room.waitForNextPatch();
+    assert.strictEqual(playerB.saidUno, false);
+    assert.strictEqual(playerA.handSize, 1);
+    assert.strictEqual(room.state.currentPlayerId, bob.sessionId);
+
+    bob.send('say_uno');
+    await room.waitForNextPatch();
+    assert.strictEqual(playerB.saidUno, false);
+    assert.strictEqual(playerA.handSize, 3);
+  });
 });

@@ -230,7 +230,9 @@ export class UnoRoom extends Room<GameState> {
     clearTimeout(this.currentTurnTimeout);
 
     for (const player of this.state.players.values()) {
-      player.saidUno = false;
+      if (player.handSize > 1) {
+        player.saidUno = false;
+      }
     }
     
     this.state.currentPlayerId = playerId;
