@@ -12,24 +12,25 @@
   "license": "ISC",
   "dependencies": {
     "@colyseus/monitor": "^0.15.8",
-    "@colyseus/playground": "^0.15.14",
     "@colyseus/schema": "^2.0.35",
-    "@colyseus/tools": "^0.15.41",
+    "@colyseus/tools": "^0.15.42",
     "colyseus": "^0.15.17",
     "express": "^4.21.1",
     "express-basic-auth": "^1.2.1",
+    "express-session": "^1.18.1",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "@colyseus/playground": "^0.15.14",
     "@colyseus/testing": "^0.15.3",
     "@types/chai": "^5.0.0",
     "@types/express": "^4.17.21",
-    "@types/mocha": "^10.0.8",
+    "@types/mocha": "^10.0.9",
     "@types/sinon": "^17.0.3",
     "chai": "^5.1.1",
     "mocha": "^10.7.3",
     "sinon": "^19.0.2",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.1"
+    "vitest": "^2.1.2"
   }
 }
