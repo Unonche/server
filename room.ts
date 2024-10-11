@@ -1,5 +1,5 @@
 import { Room, Client, matchMaker } from "colyseus";
-import { Card, Player, GameState } from "./gameState";
+import { Card, Player, GameState } from "./state";
 import { ArraySchema } from "@colyseus/schema";
 
 const diseases = [

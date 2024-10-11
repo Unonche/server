@@ -2,7 +2,7 @@ import assert from "assert";
 import { ColyseusTestServer, boot } from "@colyseus/testing";
 
 import appConfig from "./app.config";
-import { GameState } from "./gameState";
+import { GameState } from "./state";
 import sinon from 'sinon'
 
 sinon.stub(console, "log")

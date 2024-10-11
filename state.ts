@@ -3,9 +3,6 @@ import { Client } from "colyseus";
 
 export class Card extends Schema {
   @type("string")
-  id: string;
-
-  @type("string")
   color: string;
 
   @type("string")
@@ -13,7 +10,6 @@ export class Card extends Schema {
 
   constructor(color: string, value: string) {
     super();
-    this.id = color+'_'+value;
     this.color = color;
     this.value = value;
   }
