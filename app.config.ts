@@ -1,6 +1,5 @@
 import config from "@colyseus/tools";
 import { monitor } from "@colyseus/monitor";
-import { playground } from "@colyseus/playground";
 import basicAuth from "express-basic-auth";
 
 import { UnoRoom } from "./room";
@@ -19,8 +18,9 @@ export default config({
         await matchMaker.createRoom('uno_room', {});
     },
 
-    initializeExpress: (app) => {
+    initializeExpress: async (app) => {
         if (process.env.NODE_ENV !== "production") {
+            const { playground } = await import("@colyseus/playground");
             app.use("/", playground);
             app.use("/colyseus", monitor());
         } else {
