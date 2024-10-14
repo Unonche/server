@@ -53,6 +53,10 @@ export class Player extends Schema {
     this.name = name;
     this.avatar = avatar;
   }
+
+  get chatName() {
+    return `<span class="pseudo">@${this.name}</span>`
+  }
 }
 
 export class GameState extends Schema {

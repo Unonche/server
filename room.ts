@@ -13,6 +13,8 @@ const diseases = [
   'cancer du caca avec une métastase au cucu',
 ];
 
+const chatEffect = (text: string) => `<span class="effect">${text}</span>`
+
 export class UnoRoom extends Room<GameState> {
   maxClients = 6;
   private noClientTimeout: NodeJS.Timeout | null = null;
@@ -69,32 +71,32 @@ export class UnoRoom extends Room<GameState> {
 
         if (card.value === 'skip') {
           this.nextTurn();
-          if (nextPlayer) this.sendSystemMsg(`${nextPlayer.name} se fait niquer son tour (merci ${player.name})`);
+          if (nextPlayer) this.sendSystemMsg(`${nextPlayer.chatName} se fait niquer son tour (merci ${player.chatName})`);
         } else if (card.value === 'reverse') {
           this.state.reversedPlayerOrder = !this.state.reversedPlayerOrder;
-          this.sendSystemMsg(`${player.name} inverse l'ordre du jeu`);
+          this.sendSystemMsg(`${player.chatName} ${chatEffect('inverse')}l'ordre du jeu`);
         } else if (card.value === 'draw_two') {
           this.drawCard(nextPlayer, 2);
-          this.sendSystemMsg(`${player.name} fait piocher deux cartes à ${nextPlayer.name}`);
+          this.sendSystemMsg(`${player.chatName} fait piocher deux cartes à ${nextPlayer.chatName}`);
         } else if (card.value === 'draw_four') {
           this.drawCard(nextPlayer, 4);
-          if (nextPlayer) this.sendSystemMsg(`${player.name} ATOMISE ${nextPlayer.name} et lui fait piocher QUATRE cartes`);
+          if (nextPlayer) this.sendSystemMsg(`${player.chatName} ATOMISE ${nextPlayer.chatName} et lui fait piocher QUATRE cartes`);
         } else if (card.value === 'poc') {
-          this.sendSystemMsg(`${player.name} lance un POST OU CANCER, vous avez 5 secondes pour poster`);
+          this.sendSystemMsg(`${player.chatName} lance un ${chatEffect('POST OU CANCER')}, vous avez 5 secondes pour poster`);
         }  else if (card.value === 'sleep') {
           this.setTurn(player.id);
           this.broadcast("new_turn", {
             playerId: player.id,
             startTime: this.state.turnStartTime
           });
-          this.sendSystemMsg(`Tout le monde est fatigué, ${player.name} rejoue un tour`);
+          this.sendSystemMsg(`Tout le monde est ${chatEffect('fatigué')}, ${player.chatName} rejoue un tour`);
         } else if (card.value === 'luck') {
           const randomPlayer = Array.from(this.state.players.values())[Math.floor(Math.random()*this.state.players.size)]
           this.drawCard(randomPlayer, 2);
           if (randomPlayer.id === player.id) {
-            this.sendSystemMsg(`${player.name} lance un LA CHANCE, pas de bol il pioche deux cartes`);
+            this.sendSystemMsg(`${player.chatName} lance un ${chatEffect('LA CHANCE')}, pas de bol il pioche deux cartes`);
           } else {
-            this.sendSystemMsg(`${player.name} lance un LA CHANCE, ${randomPlayer.name} pioche deux cartes`);
+            this.sendSystemMsg(`${player.chatName} lance un ${chatEffect('LA CHANCE')}, ${randomPlayer.chatName} pioche deux cartes`);
           }
         }
       }
@@ -158,7 +160,7 @@ export class UnoRoom extends Room<GameState> {
 
         if (p.hand.length === 1 && !p.saidUno && p.id !== player.id) {
           this.drawCard(p, 2);
-          this.sendSystemMsg(`${player.name} crie CONTRE UNONCHE pour ${p.name} et lui fait piocher deux cartes sans vergogne`);
+          this.sendSystemMsg(`${player.chatName} crie ${chatEffect('CONTRE UNONCHE')} pour ${p.chatName} et lui fait piocher deux cartes sans vergogne`);
           contre = true;
         }
       }
@@ -169,7 +171,7 @@ export class UnoRoom extends Room<GameState> {
         this.broadcast("sayUno", {
           playerId: player.id
         });
-        this.sendSystemMsg(`${player.name} crie UNONCHE`);
+        this.sendSystemMsg(`${player.chatName} crie ${chatEffect('UNONCHE')}`);
       }
     });
   }
@@ -183,7 +185,7 @@ export class UnoRoom extends Room<GameState> {
     if (player) {
       this.broadcast("chat_msg", {
         playerId: null,
-        text: `${player.name} a rejoint la partie`
+        text: `${player.chatName} a rejoint la partie`
       });
     }
     if (this.noClientTimeout) {
@@ -195,7 +197,7 @@ export class UnoRoom extends Room<GameState> {
   onLeave(client: Client, consented: boolean) {
     const player = this.state.players.get(client.sessionId);
     if (player) {
-      this.sendSystemMsg(`${player.name} a quitté la partie`);
+      this.sendSystemMsg(`${player.chatName} a quitté la partie`);
     }
     this.state.players.delete(client.sessionId);
 
@@ -228,7 +230,7 @@ export class UnoRoom extends Room<GameState> {
     });
 
     if (playersArray.length === 1) {
-      this.sendSystemMsg('Il n\'y a plus assez de joueur, la partie est FINITO');
+      this.sendSystemMsg(`Il n'y a plus assez de joueur, la partie est ${chatEffect('FINITO')}`);
       this.broadcast("end");
       this.reset();
       return;
@@ -257,10 +259,10 @@ export class UnoRoom extends Room<GameState> {
       const player = this.state.players.get(playerId);
       if (!player) return;
       if (!this.state.lastPlayAfk.includes(player.id)) {
-        this.sendSystemMsg(`${player.name} n'a pas joué et devient spectateur`);
+        this.sendSystemMsg(`${player.chatName} n'a pas joué et devient ${chatEffect('spectateur')}`);
         player.spectator = true;
       } else {
-        this.sendSystemMsg(`${player.name} n'a pas joué pendant deux parties et est kick`);
+        this.sendSystemMsg(`${player.chatName} n'a pas joué pendant deux parties et est ${chatEffect('kick')}`);
         const client = this.clients.find(c => c.id === player.id);
         client?.leave();
       }
@@ -271,7 +273,7 @@ export class UnoRoom extends Room<GameState> {
 
   startGame() {
     this.state.playing = true;
-    this.sendSystemMsg(`La partie commence !`);
+    this.sendSystemMsg(`La partie ${chatEffect('commence')} !`);
     this.state.dealCards();
 
     const playerIds = Array.from(this.state.players.keys());
@@ -384,11 +386,11 @@ export class UnoRoom extends Room<GameState> {
 
       this.drawCard(player, 2);
       const disease = diseases[Math.floor(Math.random()*(diseases.length-1))]
-      this.sendSystemMsg(`${player.name} pioche deux cartes et choppe un ${disease}`);
+      this.sendSystemMsg(`${player.chatName} pioche deux cartes et choppe un ${chatEffect(disease)}`);
       noCancer = false;
     }
     if (noCancer) {
-      this.sendSystemMsg(`Personne ne choppe de cancer, bien joué.`);
+      this.sendSystemMsg(`Personne ne choppe de cancer, bien joué`);
     }
     this.state.pocList.clear();
     this.state.currentPlayerId = this.state.beforeEffectPlayerId;
@@ -416,7 +418,7 @@ export class UnoRoom extends Room<GameState> {
   }
 
   win(player: Player) {
-    this.sendSystemMsg(`${player.name} a gagné !`);
+    this.sendSystemMsg(`${player.chatName} a gagné !`);
     this.broadcast("win", {
       playerId: player.id,
     });
