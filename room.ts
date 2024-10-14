@@ -94,7 +94,7 @@ export class UnoRoom extends Room<GameState> {
           if (randomPlayer.id === player.id) {
             this.sendSystemMsg(`${player.name} lance un LA CHANCE, pas de bol il pioche deux cartes`);
           } else {
-            this.sendSystemMsg(`${player.name} lance un LA CHANCE, ${randomPlayer} pioche deux cartes`);
+            this.sendSystemMsg(`${player.name} lance un LA CHANCE, ${randomPlayer.name} pioche deux cartes`);
           }
         }
       }
