@@ -82,9 +82,9 @@ export class UnoRoom extends Room<GameState> {
         } else if (card.value === 'poc') {
           this.sendSystemMsg(`${player.name} lance un POST OU CANCER, vous avez 5 secondes pour poster`);
         }  else if (card.value === 'sleep') {
-          this.setTurn(nextPlayer.id);
+          this.setTurn(player.id);
           this.broadcast("new_turn", {
-            playerId: nextPlayer.id,
+            playerId: player.id,
             startTime: this.state.turnStartTime
           });
           this.sendSystemMsg(`Tout le monde est fatigué, ${player.name} rejoue un tour`);

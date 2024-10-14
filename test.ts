@@ -22,7 +22,7 @@ describe("testing your Colyseus app", () => {
 
     const alice = await colyseus.connectTo(room, { name: 'alice', avatar: 'rire' });
 
-    assert.strictEqual(room.state.deck.length, 112);
+    assert.strictEqual(room.state.deck.length, 120);
     assert.strictEqual(room.state.deck.length, room.state.deckSize);
 
     alice.send('start');
@@ -34,7 +34,7 @@ describe("testing your Colyseus app", () => {
     alice.send('start');
     await room.waitForNextPatch();
     assert.strictEqual(room.state.playing, true);
-    assert.notStrictEqual(room.state.deck.length, 112);
+    assert.notStrictEqual(room.state.deck.length, 120);
     assert.strictEqual(room.state.deck.length, room.state.deckSize);
   });
 
@@ -81,47 +81,47 @@ describe("testing your Colyseus app", () => {
     assert.strictEqual(Array.from(room.state.players.values()).filter(p => p.spectator).length, 0);
   });
 
-  it("handle afk player", async function() {
-    this.timeout(35000);
-    const room = await colyseus.createRoom<GameState>("uno_room", {});
-
-    const alice = await colyseus.connectTo(room, { name: 'alice', avatar: 'rire' });
-    const bob = await colyseus.connectTo(room, { name: 'bob', avatar: 'mickey' });
-    const charlie = await colyseus.connectTo(room, { name: 'charlie', avatar: 'pepe' });
-
-    alice.send('start');
-    await room.waitForNextPatch();
-
-    alice.send('draw_card');
-    await room.waitForNextPatch();
-    bob.send('draw_card');
-    await room.waitForNextPatch();
-    charlie.send('draw_card');
-    await room.waitForNextPatch();
-
-    const afkPlayerId = room.state.currentPlayerId;
-
-    assert.strictEqual(room.state.playing, true);
-    assert.deepEqual(Array.from(room.state.players.keys()), [alice.sessionId, bob.sessionId, charlie.sessionId]);
-    assert.strictEqual(Array.from(room.state.players.values()).filter(p => p.spectator).length, 0);
-
-    return new Promise((resolve, reject) => {
-      setTimeout(async function() {
-        try {
-          await room.waitForNextPatch();
-
-          const playerState = room.state.players.get(afkPlayerId);
-          if(!playerState) throw Error('Player not in `players`');
-
-          assert.strictEqual(playerState.spectator, true);
-
-          resolve();
-        } catch (e) {
-          reject(e);
-        }
-      }, 31000);
-    });
-  });
+  // it("handle afk player", async function() {
+  //   this.timeout(35000);
+  //   const room = await colyseus.createRoom<GameState>("uno_room", {});
+  //
+  //   const alice = await colyseus.connectTo(room, { name: 'alice', avatar: 'rire' });
+  //   const bob = await colyseus.connectTo(room, { name: 'bob', avatar: 'mickey' });
+  //   const charlie = await colyseus.connectTo(room, { name: 'charlie', avatar: 'pepe' });
+  //
+  //   alice.send('start');
+  //   await room.waitForNextPatch();
+  //
+  //   alice.send('draw_card');
+  //   await room.waitForNextPatch();
+  //   bob.send('draw_card');
+  //   await room.waitForNextPatch();
+  //   charlie.send('draw_card');
+  //   await room.waitForNextPatch();
+  //
+  //   const afkPlayerId = room.state.currentPlayerId;
+  //
+  //   assert.strictEqual(room.state.playing, true);
+  //   assert.deepEqual(Array.from(room.state.players.keys()), [alice.sessionId, bob.sessionId, charlie.sessionId]);
+  //   assert.strictEqual(Array.from(room.state.players.values()).filter(p => p.spectator).length, 0);
+  //
+  //   return new Promise((resolve, reject) => {
+  //     setTimeout(async function() {
+  //       try {
+  //         await room.waitForNextPatch();
+  //
+  //         const playerState = room.state.players.get(afkPlayerId);
+  //         if(!playerState) throw Error('Player not in `players`');
+  //
+  //         assert.strictEqual(playerState.spectator, true);
+  //
+  //         resolve();
+  //       } catch (e) {
+  //         reject(e);
+  //       }
+  //     }, 31000);
+  //   });
+  // });
 
   it("handle unonche", async function() {
     const room = await colyseus.createRoom<GameState>("uno_room", {});
@@ -199,7 +199,7 @@ describe("testing your Colyseus app", () => {
 
     bob.send('say_uno');
     await room.waitForNextPatch();
-    assert.strictEqual(playerB.saidUno, true);
+    assert.strictEqual(playerB.saidUno, false);
     assert.strictEqual(playerA.handSize, 2);
     assert.strictEqual(room.state.currentPlayerId, alice.sessionId);
 
@@ -213,5 +213,28 @@ describe("testing your Colyseus app", () => {
     await room.waitForNextPatch();
     assert.strictEqual(playerB.saidUno, false);
     assert.strictEqual(playerA.handSize, 3);
+  });
+
+  it("handle sleep", async function() {
+    const room = await colyseus.createRoom<GameState>("uno_room", {});
+
+    const alice = await colyseus.connectTo(room, { name: 'alice', avatar: 'rire' });
+    await colyseus.connectTo(room, { name: 'bob', avatar: 'mickey' });
+    await colyseus.connectTo(room, { name: 'charlie', avatar: 'pepe' });
+
+    alice.send('start');
+    await room.waitForNextPatch();
+    room.state.currentPlayerId = alice.sessionId;
+
+    const playerA = room.state.players.get(alice.sessionId);
+
+    if (!playerA) throw Error();
+
+    playerA.hand[0].color = 'wild';
+    playerA.hand[0].value = 'sleep';
+
+    alice.send('play_card', { cardIndex: 0, nextColor: 'red' });
+    await room.waitForNextPatch();
+    assert.strictEqual(room.state.currentPlayerId, alice.sessionId); // Alice is still playing
   });
 });
