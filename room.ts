@@ -165,7 +165,7 @@ export class UnoRoom extends Room<GameState> {
         }
       }
 
-      if (player.id === this.state.currentPlayerId && !contre && !player.saidUno) {
+      if ((player.id === this.state.currentPlayerId || player.hand.length === 1) && !contre && !player.saidUno) {
         player.saidUno = true;
 
         this.broadcast("sayUno", {
