@@ -362,6 +362,7 @@ export class UnoRoom extends Room<GameState> {
 
   endPOC() {
     clearTimeout(this.pocTimeout);
+    let noCancer = true;
     for (const playerId of this.state.pocList) {
       const player = this.state.players.get(playerId);
       if (!player) continue;
@@ -369,6 +370,10 @@ export class UnoRoom extends Room<GameState> {
       this.drawCard(player, 2);
       const disease = diseases[Math.floor(Math.random()*(diseases.length-1))]
       this.sendSystemMsg(`${player.name} pioche deux cartes et choppe un ${disease}`);
+      noCancer = false;
+    }
+    if (noCancer) {
+      this.sendSystemMsg(`Personne ne choppe de cancer, bien joué.`);
     }
     this.state.pocList.clear();
     this.state.currentPlayerId = this.state.beforeEffectPlayerId;
