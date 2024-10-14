@@ -81,6 +81,21 @@ export class UnoRoom extends Room<GameState> {
           if (nextPlayer) this.sendSystemMsg(`${player.name} ATOMISE ${nextPlayer.name} et lui fait piocher QUATRE cartes`);
         } else if (card.value === 'poc') {
           this.sendSystemMsg(`${player.name} lance un POST OU CANCER, vous avez 5 secondes pour poster`);
+        }  else if (card.value === 'sleep') {
+          this.setTurn(nextPlayer.id);
+          this.broadcast("new_turn", {
+            playerId: nextPlayer.id,
+            startTime: this.state.turnStartTime
+          });
+          this.sendSystemMsg(`Tout le monde est fatigué, ${player.name} rejoue un tour`);
+        } else if (card.value === 'luck') {
+          const randomPlayer = Array.from(this.state.players.values())[Math.floor(Math.random()*this.state.players.size)]
+          this.drawCard(randomPlayer, 2);
+          if (randomPlayer.id === player.id) {
+            this.sendSystemMsg(`${player.name} lance un LA CHANCE, pas de bol il pioche deux cartes`);
+          } else {
+            this.sendSystemMsg(`${player.name} lance un LA CHANCE, ${randomPlayer} pioche deux cartes`);
+          }
         }
       }
 
@@ -98,7 +113,7 @@ export class UnoRoom extends Room<GameState> {
 
       if (card.value === 'poc') {
         this.startPOC();
-      } else {
+      } else if (card.value !== 'sleep') {
         this.nextTurn();
       }
     });

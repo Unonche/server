@@ -128,6 +128,8 @@ export class GameState extends Schema {
       deck.push(new Card("wild", "wild"));
       deck.push(new Card("wild", "draw_four"));
       deck.push(new Card("wild", "poc"));
+      deck.push(new Card("wild", "sleep"));
+      deck.push(new Card("wild", "luck"));
     }
 
     this.deckSize = deck.length;
