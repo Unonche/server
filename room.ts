@@ -16,7 +16,8 @@ const diseases = [
 const chatEffect = (text: string) => `<span class="effect">${text}</span>`
 
 export class UnoRoom extends Room<GameState> {
-  maxClients = 6;
+  maxClients = 50;
+  maxPlayers = 6;
   private noClientTimeout: NodeJS.Timeout | null = null;
   private readonly autoDisposeTimeout = 3600000; // 1 hour in milliseconds
 
@@ -74,7 +75,7 @@ export class UnoRoom extends Room<GameState> {
           if (nextPlayer) this.sendSystemMsg(`${nextPlayer.chatName} se fait niquer son tour (merci ${player.chatName})`);
         } else if (card.value === 'reverse') {
           this.state.reversedPlayerOrder = !this.state.reversedPlayerOrder;
-          this.sendSystemMsg(`${player.chatName} ${chatEffect('inverse')}l'ordre du jeu`);
+          this.sendSystemMsg(`${player.chatName} ${chatEffect('inverse')} l'ordre du jeu`);
         } else if (card.value === 'draw_two') {
           this.drawCard(nextPlayer, 2);
           this.sendSystemMsg(`${player.chatName} fait piocher deux cartes à ${nextPlayer.chatName}`);
@@ -180,9 +181,15 @@ export class UnoRoom extends Room<GameState> {
     if (!/^[-_a-zA-Z0-9]{3,15}$/.test(options.name) || !['rire','jesus','magalax','mickey','zidane','fatigue','pepe','chat'].includes(options.avatar))
       return client.leave(4000, 'Pseudo ou avatar incorrect');
 
+    const playerIds = Array.from(this.state.players.keys()).filter(id => !this.state.players.get(id)?.spectator);
+    const isFull = playerIds.length === this.maxPlayers;
     this.state.addPlayer(client.sessionId, options.name, options.avatar);
     const player = this.state.players.get(client.sessionId);
     if (player) {
+      if (isFull) {
+        player.spectator = true;
+        if (player.id === this.state.kingPlayerId) this.setKingPlayer();
+      }
       this.broadcast("chat_msg", {
         playerId: null,
         text: `${player.chatName} a rejoint la partie`
@@ -261,6 +268,7 @@ export class UnoRoom extends Room<GameState> {
       if (!this.state.lastPlayAfk.includes(player.id)) {
         this.sendSystemMsg(`${player.chatName} n'a pas joué et devient ${chatEffect('spectateur')}`);
         player.spectator = true;
+        if (player.id === this.state.kingPlayerId) this.setKingPlayer();
       } else {
         this.sendSystemMsg(`${player.chatName} n'a pas joué pendant deux parties et est ${chatEffect('kick')}`);
         const client = this.clients.find(c => c.id === player.id);
@@ -269,6 +277,12 @@ export class UnoRoom extends Room<GameState> {
       this.onPlayersUpdate();
       this.nextTurn();
     }, 30000);
+  }
+
+  setKingPlayer() {
+    const playerIds = Array.from(this.state.players.keys()).filter(id => !this.state.players.get(id)?.spectator);
+    if (playerIds.length <= 0) this.state.kingPlayerId = 'NOPE';
+    else this.state.kingPlayerId = playerIds[0];
   }
 
   startGame() {
@@ -409,11 +423,13 @@ export class UnoRoom extends Room<GameState> {
     this.state.discardPile.clear();
     this.state.deck = this.state.generateDeck();
     this.state.shuffleDeck();
+    let i = 0;
     for (const player of this.state.players.values()) {
-      player.spectator = false;
+      player.spectator = i < this.maxPlayers ? false : true;
       player.hand.clear();
       player.handSize = 0;
       player.saidUno = false;
+      i++;
     }
   }
 
