@@ -414,6 +414,7 @@ export class UnoRoom extends Room<GameState> {
 
   reset() {
     clearTimeout(this.currentTurnTimeout);
+    this.state.lastPlayAfk = new ArraySchema<string>(...Array.from(this.state.players.values()).filter(p => p.spectator).map(p => p.id));
     this.state.playing = false;
     this.state.currentPlayerId = 'NOPE';
     this.state.reversedPlayerOrder = false;
@@ -438,7 +439,6 @@ export class UnoRoom extends Room<GameState> {
     this.broadcast("win", {
       playerId: player.id,
     });
-    this.state.lastPlayAfk = new ArraySchema<string>(...Array.from(this.state.players.values()).filter(p => p.spectator).map(p => p.id));
     this.reset();
   }
 }
