@@ -65,6 +65,13 @@ export class UnoRoom extends Room<GameState> {
       player.handSize--;
       this.state.discardPile.push(card);
 
+      this.broadcast("play_card", {
+        playerId: client.id,
+        cardIndex: message.cardIndex,
+        card,
+        nextColor: this.state.nextColor
+      });
+
       const nextPlayer = this.getNextPlayer();
 
       if (nextPlayer) {
@@ -101,13 +108,6 @@ export class UnoRoom extends Room<GameState> {
           }
         }
       }
-
-      this.broadcast("play_card", {
-        playerId: client.id,
-        cardIndex: message.cardIndex,
-        card,
-        nextColor: this.state.nextColor
-      });
 
       if (player.hand.length <= 0) {
         this.win(player);
