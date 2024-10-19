@@ -65,6 +65,8 @@ export class UnoRoom extends Room<GameState> {
       player.handSize--;
       this.state.discardPile.push(card);
 
+      if (card.color === 'wild') this.state.nextColor = nextColor;
+
       this.broadcast("play_card", {
         playerId: client.id,
         cardIndex: message.cardIndex,
@@ -75,8 +77,6 @@ export class UnoRoom extends Room<GameState> {
       const nextPlayer = this.getNextPlayer();
 
       if (nextPlayer) {
-        if (card.color === 'wild') this.state.nextColor = nextColor;
-
         if (card.value === 'skip') {
           this.nextTurn();
           if (nextPlayer) this.sendSystemMsg(`${nextPlayer.chatName} se fait niquer son tour (merci ${player.chatName})`);
