@@ -237,7 +237,7 @@ export class UnoRoom extends Room<GameState> {
       players: this.state.players
     });
 
-    if (playersArray.length === 1) {
+    if (this.state.playing && playersArray.length === 1) {
       this.sendSystemMsg(`Il n'y a plus assez de joueur, la partie est ${chatEffect('FINITO')}`);
       this.broadcast("end");
       this.reset();
