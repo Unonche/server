@@ -99,7 +99,8 @@ export class UnoRoom extends Room<GameState> {
           });
           this.sendSystemMsg(`Tout le monde est ${chatEffect('fatigué')}, ${player.chatName} rejoue un tour`);
         } else if (card.value === 'luck') {
-          const randomPlayer = Array.from(this.state.players.values())[Math.floor(Math.random()*this.state.players.size)]
+          const players = Array.from(this.state.players.values()).filter(p => !p.spectator);
+          const randomPlayer = players[Math.floor(Math.random()*players.length)]
           this.drawCard(randomPlayer, 2);
           if (randomPlayer.id === player.id) {
             this.sendSystemMsg(`${player.chatName} lance un ${chatEffect('LA CHANCE')}, pas de bol il pioche deux cartes`);
