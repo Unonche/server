@@ -179,7 +179,7 @@ export class UnoRoom extends Room<GameState> {
   }
 
   onJoin(client: Client, options: any) {
-    if (!/^[-_a-zA-Z0-9]{3,15}$/.test(options.name) || !['rire','jesus','magalax','mickey','zidane','fatigue','pepe','chat'].includes(options.avatar))
+    if (!/^[-_a-zA-Z0-9]{3,15}$/.test(options.name) || !['rire','jesus','magalax','mickey','zidane','fatigue','pepe','chat','boomer','michelblanc','trapvador'].includes(options.avatar))
       return client.leave(4000, 'Pseudo ou avatar incorrect');
 
     const playerIds = Array.from(this.state.players.keys()).filter(id => !this.state.players.get(id)?.spectator);
